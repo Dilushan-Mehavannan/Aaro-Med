@@ -83,7 +83,10 @@ export default function LandingPage() {
   }, [user]);
 
   useEffect(() => {
-    api.get('/patient/doctors').then(res => setFeaturedDoctors(res.data.slice(0, 6))).catch(() => {});
+    api.get('/patient/doctors').then(res => {
+      if (Array.isArray(res.data)) setFeaturedDoctors(res.data.slice(0, 6));
+      else setFeaturedDoctors([]);
+    }).catch(() => setFeaturedDoctors([]));
   }, []);
 
   return (

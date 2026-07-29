@@ -21,8 +21,9 @@ export default function PsychiatristsList() {
   const loadPsychiatrists = async () => {
     try {
       const response = await doctorService.getPsychiatrists();
-      setPsychiatrists(response.data);
-      setFilteredPsychiatrists(response.data);
+      const list = Array.isArray(response.data) ? response.data : [];
+      setPsychiatrists(list);
+      setFilteredPsychiatrists(list);
     } catch (error) {
       addToast(error.response?.data?.error || 'Failed to load psychiatrists', 'error');
     } finally {

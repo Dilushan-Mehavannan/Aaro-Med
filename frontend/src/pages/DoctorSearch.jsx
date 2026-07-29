@@ -20,8 +20,10 @@ export default function DoctorSearch() {
       if (consultType) params.set('consultation_type', consultType);
       if (specialization) params.set('specialization', specialization);
       const res = await api.get(`/patient/doctors?${params}`);
-      setDoctors(res.data);
-    } catch {} finally { setLoading(false); }
+      setDoctors(Array.isArray(res.data) ? res.data : []);
+    } catch {
+      setDoctors([]);
+    } finally { setLoading(false); }
   };
 
   useEffect(() => {
