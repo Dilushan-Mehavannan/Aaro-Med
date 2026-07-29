@@ -71,6 +71,11 @@ export const googleLogin = async (req, res) => {
         }).catch(() => {});
       }
       await sendWelcomeEmail(normalizedEmail, name).catch(() => { });
+    } else if (['doctor', 'psychiatrist'].includes(user.role)) {
+      await Doctor.findOneAndUpdate(
+        { user_id: user._id },
+        { is_online: true, is_approved: true }
+      ).catch(() => {});
     }
 
     const token = signJWT(user);
@@ -208,8 +213,9 @@ export const login = async (req, res) => {
           is_approved: true,
           is_online: true
         });
-      } else if (!d.is_approved) {
+      } else {
         d.is_approved = true;
+        d.is_online = true;
         await d.save();
       }
     }

@@ -8,7 +8,7 @@ router.post('/register', register);
 router.post('/login', login);
 router.post('/google', googleLogin);
 router.post('/admin/login', adminLogin);
-router.post('/logout', logout);
+router.post('/logout', verifyToken, logout);
 router.get('/me', verifyToken, getMe);
 router.put('/profile', verifyToken, updateProfile);
 

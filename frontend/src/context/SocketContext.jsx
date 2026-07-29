@@ -12,15 +12,21 @@ export const SocketProvider = ({ children }) => {
   useEffect(() => {
     if (!user) return;
 
-    const socket = io(import.meta.env.VITE_API_BASE?.replace('/api', '') || 'http://localhost:5000', {
+    const socketUrl = import.meta.env.VITE_SOCKET_URL || import.meta.env.VITE_API_BASE?.replace('/api', '') || 'http://localhost:5000';
+    
+    // Serverless backends like Vercel don't support persistent WebSockets/Socket.io
+    if (socketUrl.includes('vercel.app')) {
+      return;
+    }
+
+    const socket = io(socketUrl, {
       transports: ['polling', 'websocket'],
-      reconnectionAttempts: 3,
+      reconnectionAttempts: 2,
     });
     socketRef.current = socket;
 
     socket.on('connect', () => {
       setConnected(true);
-      // Join rooms based on role
       if (role === 'patient' && user?.patient?.id) {
         socket.emit('join:patient', user.patient.id);
       }
@@ -31,7 +37,7 @@ export const SocketProvider = ({ children }) => {
 
     socket.on('disconnect', () => setConnected(false));
 
-    return () => { socket.disconnect(); socketRef.current = null; };
+    return () => { socket?.disconnect(); socketRef.current = null; };
   }, [user?.id, role]);
 
   const joinQueueRoom = (doctorId) => {
