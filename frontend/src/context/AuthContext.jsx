@@ -31,13 +31,19 @@ export const AuthProvider = ({ children }) => {
     setRole(userRole);
   };
 
-  const logout = () => {
-    localStorage.removeItem('sd_token');
-    setToken(null);
-    setUser(null);
-    setRole(null);
-    setLoading(false);
-  };
+  const logout = useCallback(async () => {
+    try {
+      if (token) {
+        await api.post('/auth/logout').catch(() => {});
+      }
+    } finally {
+      localStorage.removeItem('sd_token');
+      setToken(null);
+      setUser(null);
+      setRole(null);
+      setLoading(false);
+    }
+  }, [token]);
 
   const value = React.useMemo(() => ({
     user, token, role, loading, login, logout, fetchMe

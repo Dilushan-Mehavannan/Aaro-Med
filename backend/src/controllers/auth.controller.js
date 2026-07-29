@@ -277,14 +277,10 @@ import { getIO } from '../socket/queue.socket.js';
 
 export const logout = async (req, res) => {
   try {
-    if (req.user?.id) {
-      const doctor = await Doctor.findOne({ user_id: req.user.id });
-      if (doctor) {
-        doctor.is_online = false;
-        await doctor.save();
-        const io = getIO();
-        if (io) io.emit('doctors:updated');
-      }
+    const userId = req.user?.id || req.user?._id;
+    if (userId) {
+      await Doctor.findOneAndUpdate({ user_id: userId }, { is_online: false }).catch(() => {});
+      console.log(`[AUTH] User ${userId} logged out. Doctor is_online set to false.`);
     }
   } catch (err) {
     console.error('[AUTH] Logout status update error:', err);
