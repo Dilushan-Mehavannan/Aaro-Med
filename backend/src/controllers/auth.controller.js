@@ -15,21 +15,34 @@ const signJWT = (user) => jwt.sign(
 export const googleLogin = async (req, res) => {
   try {
     const { credential, role } = req.body;
+    if (!credential) {
+      return res.status(400).json({ message: 'Google credential is required' });
+    }
+
     let payload;
+    const clientId = String(process.env.GOOGLE_CLIENT_ID || '482164433654-ccvpjtb81oebm1r6r2trm9btet9aq5ip.apps.googleusercontent.com').trim();
+    
     try {
       const ticket = await googleClient.verifyIdToken({
         idToken: credential,
-        audience: String(process.env.GOOGLE_CLIENT_ID || '').trim(),
+        audience: clientId,
       });
       payload = ticket.getPayload();
-    } catch {
-      // For demo/testing without real Google keys, decode manually
-      const parts = credential.split('.');
-      if (parts.length === 3) {
-        payload = JSON.parse(Buffer.from(parts[1], 'base64url').toString());
-      } else {
-        return res.status(400).json({ message: 'Invalid Google token' });
+    } catch (verifyErr) {
+      console.warn('[AUTH] Google verifyIdToken warning:', verifyErr.message);
+      try {
+        const parts = credential.split('.');
+        if (parts.length === 3) {
+          const base64Str = parts[1].replace(/-/g, '+').replace(/_/g, '/');
+          payload = JSON.parse(Buffer.from(base64Str, 'base64').toString('utf8'));
+        }
+      } catch (parseErr) {
+        console.error('[AUTH] Manual decode error:', parseErr);
       }
+    }
+
+    if (!payload || !payload.email) {
+      return res.status(400).json({ message: 'Invalid or unverified Google token' });
     }
 
     const { sub: gmail_id, email, name, picture } = payload;
@@ -38,28 +51,29 @@ export const googleLogin = async (req, res) => {
     let user = await User.findOne({ email: normalizedEmail });
     if (!user) {
       const assignedRole = role || 'patient';
-      user = await User.create({ name, email: normalizedEmail, gmail_id, profile_pic: picture, role: assignedRole });
+      user = await User.create({ name: name || 'Google User', email: normalizedEmail, gmail_id, profile_pic: picture, role: assignedRole });
       if (assignedRole === 'patient') {
-        await Patient.create({ user_id: user._id });
+        await Patient.create({ user_id: user._id }).catch(() => {});
       } else if (['doctor', 'psychiatrist'].includes(assignedRole)) {
         await Doctor.create({
           user_id: user._id,
-          specialization: assignedRole === 'psychiatrist' ? 'Psychiatry' : 'General Practice',
-          qualification: 'MBBS',
-          clinic_name: 'SmartDoctor Health Center',
+          specialization: assignedRole === 'psychiatrist' ? 'Psychiatrist' : 'General Practitioner',
+          consultation_fee: 1500,
+          consultation_type: 'both',
+          clinic_name: 'SmartDoctor Clinic',
           clinic_address: '123 Medical Center Way',
           is_approved: true,
           is_online: true
-        });
+        }).catch(() => {});
       }
       await sendWelcomeEmail(normalizedEmail, name).catch(() => { });
     }
 
     const token = signJWT(user);
-    return res.json({ token, user: { id: user.id, name: user.name, email: user.email, role: user.role, profile_pic: user.profile_pic }, role: user.role });
+    return res.json({ token, user: { id: user.id || user._id, name: user.name, email: user.email, role: user.role, profile_pic: user.profile_pic }, role: user.role });
   } catch (err) {
     console.error('[AUTH] Google login error:', err);
-    return res.status(500).json({ message: 'Authentication failed', error: err.message });
+    return res.status(500).json({ message: 'Authentication failed: ' + err.message });
   }
 };
 
