@@ -95,22 +95,22 @@ const PORT = process.env.PORT || 5000;
 
 import Doctor from './models/Doctor.js';
 
-// Connect DB and start
-const startServer = async () => {
-  try {
-    await connectDB();
-    await Doctor.updateMany({}, { is_online: false });
+// Connect DB and start local standalone server only if not on Vercel
+if (!process.env.VERCEL) {
+  const startServer = async () => {
+    try {
+      await connectDB();
+      await Doctor.updateMany({}, { is_online: false });
 
-    server.listen(PORT, '0.0.0.0', () => {
-      console.log(`🚀 SmartDoctor API running on http://localhost:${PORT}`);
-      console.log(`📊 Health: http://localhost:${PORT}/api/health`);
-    });
-  } catch (err) {
-    console.error('❌ Startup failed:', err.message);
-    process.exit(1);
-  }
-};
-
-startServer();
+      server.listen(PORT, '0.0.0.0', () => {
+        console.log(`🚀 SmartDoctor API running on http://localhost:${PORT}`);
+        console.log(`📊 Health: http://localhost:${PORT}/api/health`);
+      });
+    } catch (err) {
+      console.error('❌ Startup failed:', err.message);
+    }
+  };
+  startServer();
+}
 
 export default app;
