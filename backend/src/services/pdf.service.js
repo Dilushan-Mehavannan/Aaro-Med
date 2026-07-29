@@ -1,4 +1,3 @@
-import puppeteer from 'puppeteer';
 import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
@@ -102,58 +101,45 @@ export const generatePrescriptionPDF = async (prescriptionData) => {
 </body>
 </html>`;
 
-  const launchOptions = {
-    headless: 'new',
-    args: [
-      '--no-sandbox',
-      '--disable-setuid-sandbox',
-      '--disable-dev-shm-usage',
-      '--disable-gpu'
-    ]
-  };
+  try {
+    const puppeteerModule = await import('puppeteer');
+    const puppeteer = puppeteerModule.default || puppeteerModule;
+    
+    const launchOptions = {
+      headless: 'new',
+      args: ['--no-sandbox', '--disable-setuid-sandbox', '--disable-dev-shm-usage', '--disable-gpu']
+    };
 
-  const localAppData = process.env.LOCALAPPDATA || path.join(process.env.USERPROFILE || 'C:\\Users\\afham', 'AppData\\Local');
-  const programFiles = process.env.PROGRAMFILES || 'C:\\Program Files';
-  const programFilesX86 = process.env['PROGRAMFILES(X86)'] || 'C:\\Program Files (x86)';
+    const localAppData = process.env.LOCALAPPDATA || path.join(process.env.USERPROFILE || 'C:\\Users\\afham', 'AppData\\Local');
+    const programFiles = process.env.PROGRAMFILES || 'C:\\Program Files';
+    const programFilesX86 = process.env['PROGRAMFILES(X86)'] || 'C:\\Program Files (x86)';
 
-  const chromePaths = [
-    path.join(programFiles, 'Google\\Chrome\\Application\\chrome.exe'),
-    path.join(programFilesX86, 'Google\\Chrome\\Application\\chrome.exe'),
-    path.join(localAppData, 'Google\\Chrome\\Application\\chrome.exe'),
-    path.join(programFilesX86, 'Microsoft\\Edge\\Application\\msedge.exe'),
-    path.join(programFiles, 'Microsoft\\Edge\\Application\\msedge.exe'),
-    path.join(localAppData, 'Microsoft\\Edge\\Application\\msedge.exe')
-  ];
+    const chromePaths = [
+      path.join(programFiles, 'Google\\Chrome\\Application\\chrome.exe'),
+      path.join(programFilesX86, 'Google\\Chrome\\Application\\chrome.exe'),
+      path.join(localAppData, 'Google\\Chrome\\Application\\chrome.exe'),
+      path.join(programFilesX86, 'Microsoft\\Edge\\Application\\msedge.exe'),
+      path.join(programFiles, 'Microsoft\\Edge\\Application\\msedge.exe'),
+      path.join(localAppData, 'Microsoft\\Edge\\Application\\msedge.exe')
+    ];
 
-  let foundPath = null;
-  for (const p of chromePaths) {
-    if (fs.existsSync(p)) {
-      foundPath = p;
-      launchOptions.executablePath = p;
-      break;
+    for (const p of chromePaths) {
+      if (fs.existsSync(p)) {
+        launchOptions.executablePath = p;
+        break;
+      }
     }
-  }
 
-  console.log(`[Puppeteer] Launching. Executable path: ${foundPath || 'default bundle'}`);
-
-  let browser;
-  try {
-    browser = await puppeteer.launch(launchOptions);
-  } catch (launchErr) {
-    console.error('[Puppeteer] Launch failed. Searched paths:', chromePaths);
-    throw new Error(`Failed to launch PDF generator: ${launchErr.message}`);
-  }
-
-  try {
+    const browser = await puppeteer.launch(launchOptions);
     const page = await browser.newPage();
     await page.setContent(html, { waitUntil: 'networkidle0' });
     await page.pdf({ path: filePath, format: 'A4', printBackground: true, margin: { top: '10mm', bottom: '10mm', left: '10mm', right: '10mm' } });
     await browser.close();
-  } catch (pageErr) {
-    if (browser) await browser.close();
-    console.error('[Puppeteer] Page operations failed:', pageErr);
-    throw pageErr;
+    return filePath;
+  } catch (err) {
+    console.warn('[PDF Service] Puppeteer not available, returning HTML fallback path:', err.message);
+    const htmlPath = filePath.replace('.pdf', '.html');
+    fs.writeFileSync(htmlPath, html, 'utf8');
+    return htmlPath;
   }
-
-  return filePath;
 };
