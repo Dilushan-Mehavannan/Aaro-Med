@@ -52,10 +52,17 @@ app.use((req, res, next) => {
   next();
 });
 
-// Serve uploaded PDFs
-app.use('/uploads', express.static(path.join(__dirname, '../uploads')));
+// Connect DB middleware for serverless
+app.use(async (req, res, next) => {
+  try {
+    await connectDB();
+    next();
+  } catch (err) {
+    console.error('[DB CONNECT ERROR]', err);
+    return res.status(500).json({ message: 'Database connection error: ' + err.message });
+  }
+});
 
-// System log middleware (after auth middleware is applied per route)
 // Routes
 app.use('/api/auth', authRoutes);
 app.use('/api/patient', patientRoutes);
