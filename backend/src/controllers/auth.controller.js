@@ -4,11 +4,14 @@ import { OAuth2Client } from 'google-auth-library';
 import { User, Doctor, Patient, SystemLog } from '../models/index.js';
 import { sendWelcomeEmail } from '../services/email.service.js';
 
-const googleClient = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
+const GOOGLE_CLIENT_ID = process.env.GOOGLE_CLIENT_ID || '482164433654-ccvpjtb81oebm1r6r2trm9btet9aq5ip.apps.googleusercontent.com';
+const JWT_SECRET = process.env.JWT_SECRET || '30e75a39ed8ae4e2eac68bc3fdbf7fee4e0821c3fc15e6fb7f362c951cf55dea';
+
+const googleClient = new OAuth2Client(GOOGLE_CLIENT_ID);
 
 const signJWT = (user) => jwt.sign(
-  { id: user.id, email: user.email, role: user.role },
-  process.env.JWT_SECRET,
+  { id: user.id || user._id, email: user.email, role: user.role },
+  JWT_SECRET,
   { expiresIn: process.env.JWT_EXPIRY || '7d' }
 );
 
@@ -20,7 +23,7 @@ export const googleLogin = async (req, res) => {
     }
 
     let payload;
-    const clientId = String(process.env.GOOGLE_CLIENT_ID || '482164433654-ccvpjtb81oebm1r6r2trm9btet9aq5ip.apps.googleusercontent.com').trim();
+    const clientId = String(GOOGLE_CLIENT_ID).trim();
     
     try {
       const ticket = await googleClient.verifyIdToken({
@@ -58,6 +61,7 @@ export const googleLogin = async (req, res) => {
         await Doctor.create({
           user_id: user._id,
           specialization: assignedRole === 'psychiatrist' ? 'Psychiatrist' : 'General Practitioner',
+          qualification: 'MBBS',
           consultation_fee: 1500,
           consultation_type: 'both',
           clinic_name: 'SmartDoctor Clinic',

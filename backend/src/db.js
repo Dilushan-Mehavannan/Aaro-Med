@@ -8,6 +8,7 @@ const connectDB = async () => {
   if (isConnected || mongoose.connection.readyState >= 1) {
     return;
   }
+  try {
     const mongoUri = (process.env.MONGODB_URI || '').trim() || 'mongodb+srv://dilushanmehavannan_db_user:9VdcbqyFtjCv1Rdo@cluster0.u6cs7wz.mongodb.net/smartdoctor?retryWrites=true&w=majority';
     const conn = await mongoose.connect(mongoUri);
     isConnected = true;
