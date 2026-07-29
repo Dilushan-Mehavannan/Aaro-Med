@@ -13,7 +13,7 @@ const todayEnd = () => { const d = new Date(); d.setHours(23,59,59,999); return 
 export const getDoctors = async (req, res) => {
   try {
     const { specialization, consultation_type, search } = req.query;
-    const match = { is_approved: true, is_online: true };
+    const match = { is_approved: true };
     if (specialization) match.specialization = { $regex: specialization, $options: 'i' };
     if (consultation_type) {
       if (consultation_type === 'online') {
@@ -35,19 +35,20 @@ export const getDoctors = async (req, res) => {
     }).lean();
 
     // Filter out doctors where user didn't match the search
-    const filteredDoctors = doctors.filter(d => d.user_id != null);
+    const filteredDoctors = (doctors || []).filter(d => d && d.user_id != null);
 
     const result = await Promise.all(filteredDoctors.map(async (d) => {
+      const limit = d.daily_limit || 20;
       const bookedToday = await Token.countDocuments({
         doctor_id: d._id, booking_time: { $gte: todayStart(), $lte: todayEnd() }, status: { $ne: 'cancelled' }
-      });
+      }).catch(() => 0);
       return {
         ...d,
         id: d._id,
         user: d.user_id,
         booked_today: bookedToday,
-        available_slots: Math.max(0, d.daily_limit - bookedToday),
-        is_available: bookedToday < d.daily_limit,
+        available_slots: Math.max(0, limit - bookedToday),
+        is_available: bookedToday < limit,
       };
     }));
 
