@@ -29,7 +29,7 @@ export default function DoctorProfile() {
       <div className="container" style={{ paddingTop: 32, paddingBottom: 60 }}>
         <Link to="/doctors" style={{ color: 'var(--text-muted)', fontSize: '0.9rem', display: 'inline-block', marginBottom: 24 }}>← Back to Doctors</Link>
 
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 320px', gap: 28 }}>
+        <div className="grid-auto" style={{ gap: 28 }}>
           {/* Main Info */}
           <div>
             <div className="glass-card" style={{ marginBottom: 20 }}>

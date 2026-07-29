@@ -86,12 +86,12 @@ function PrescriptionForm({ consultationId, doctor, onSubmit }) {
       {prescriptionType === 'write' ? (
         <>
           {medicines.map((m, i) => (
-            <div key={i} style={{ display: 'grid', gridTemplateColumns: '2fr 1fr 1fr 2fr auto', gap: 8, marginBottom: 10 }}>
+            <div key={i} className="grid-auto" style={{ gap: 8, marginBottom: 12, paddingBottom: 10, borderBottom: '1px dashed var(--border)' }}>
               <input className="form-input" value={m.name} onChange={e => updateMedicine(i, 'name', e.target.value)} placeholder="Medicine name" style={{ fontSize: '0.85rem', padding: '8px 10px' }} />
-              <input className="form-input" value={m.dosage} onChange={e => updateMedicine(i, 'dosage', e.target.value)} placeholder="Dosage" style={{ fontSize: '0.85rem', padding: '8px 10px' }} />
-              <input className="form-input" value={m.duration} onChange={e => updateMedicine(i, 'duration', e.target.value)} placeholder="Duration" style={{ fontSize: '0.85rem', padding: '8px 10px' }} />
-              <input className="form-input" value={m.instructions} onChange={e => updateMedicine(i, 'instructions', e.target.value)} placeholder="Instructions" style={{ fontSize: '0.85rem', padding: '8px 10px' }} />
-              <button type="button" className="btn btn-danger btn-sm" onClick={() => removeMedicine(i)} style={{ padding: '8px 10px' }}>×</button>
+              <input className="form-input" value={m.dosage} onChange={e => updateMedicine(i, 'dosage', e.target.value)} placeholder="Dosage (e.g. 500mg)" style={{ fontSize: '0.85rem', padding: '8px 10px' }} />
+              <input className="form-input" value={m.duration} onChange={e => updateMedicine(i, 'duration', e.target.value)} placeholder="Duration (e.g. 5 days)" style={{ fontSize: '0.85rem', padding: '8px 10px' }} />
+              <input className="form-input" value={m.instructions} onChange={e => updateMedicine(i, 'instructions', e.target.value)} placeholder="Instructions (e.g. After meals)" style={{ fontSize: '0.85rem', padding: '8px 10px' }} />
+              <button type="button" className="btn btn-danger btn-sm btn-full" onClick={() => removeMedicine(i)} style={{ padding: '8px 10px' }}>Remove</button>
             </div>
           ))}
           <button type="button" className="btn btn-ghost btn-sm" onClick={addMedicine} style={{ marginBottom: 12 }}>+ Add Medicine</button>
@@ -537,7 +537,7 @@ function SupportTab() {
   };
 
   return (
-    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 24, alignItems: 'flex-start' }}>
+    <div className="grid-2" style={{ gap: 24, alignItems: 'flex-start' }}>
       <div>
         <h3 style={{ marginBottom: 20 }}>Submit Support Ticket</h3>
         <form onSubmit={submit} className="glass-card">

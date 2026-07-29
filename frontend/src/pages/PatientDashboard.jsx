@@ -303,7 +303,7 @@ export default function PatientDashboard() {
         )}
 
         {tab === 'support' && (
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 24, alignItems: 'flex-start' }}>
+          <div className="grid-2" style={{ gap: 24, alignItems: 'flex-start' }}>
             <div>
               <h3 style={{ marginBottom: 20 }}>Submit a Support Ticket</h3>
               <form onSubmit={submitTicket} className="glass-card">
