@@ -13,7 +13,8 @@ export const SocketProvider = ({ children }) => {
     if (!user) return;
 
     const socket = io(import.meta.env.VITE_API_BASE?.replace('/api', '') || 'http://localhost:5000', {
-      transports: ['websocket'],
+      transports: ['polling', 'websocket'],
+      reconnectionAttempts: 3,
     });
     socketRef.current = socket;
 

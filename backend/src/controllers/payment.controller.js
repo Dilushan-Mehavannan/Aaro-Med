@@ -8,8 +8,13 @@ export const initiatePayment = async (req, res) => {
   try {
     const { doctorId, type, tokenId } = req.body;
     const patientUser = await User.findById(req.user.id);
-    const patient = await Patient.findOne({ user_id: req.user.id });
-    if (!patient) return res.status(400).json({ message: 'Patient profile not found' });
+    if (!patientUser) return res.status(404).json({ message: 'User profile not found' });
+
+    let patient = await Patient.findOne({ user_id: req.user.id });
+    if (!patient) {
+      patient = await Patient.create({ user_id: req.user.id }).catch(() => null);
+      if (!patient) patient = await Patient.findOne({ user_id: req.user.id });
+    }
 
     const doctor = await Doctor.findById(doctorId);
     if (!doctor) return res.status(404).json({ message: 'Doctor not found' });
@@ -25,7 +30,8 @@ export const initiatePayment = async (req, res) => {
       }
     }
 
-    const amount = type === 'booking' ? parseFloat(doctor.booking_fee) : parseFloat(doctor.consultation_fee);
+    const fee = type === 'booking' ? (doctor.booking_fee || 0) : (doctor.consultation_fee || 1500);
+    const amount = parseFloat(fee);
 
     const payment = await Payment.create({
       patient_id: patient._id,
@@ -35,28 +41,36 @@ export const initiatePayment = async (req, res) => {
 
     const hash = generatePayHereHash(payment._id.toString(), amount.toFixed(2), 'LKR');
 
+    const clientUrl = process.env.CLIENT_URL || 'https://aaro-medi.web.app';
+    const serverUrl = process.env.SERVER_URL || 'https://aaro-med.vercel.app';
+    const merchantId = process.env.PAYHERE_MERCHANT_ID || '1228422';
+
+    const fullName = patientUser.name || 'Patient User';
+    const nameParts = fullName.split(' ');
+
     const payhereParams = {
-      sandbox: process.env.PAYHERE_SANDBOX === 'true',
-      merchant_id: process.env.PAYHERE_MERCHANT_ID,
-      return_url: `${process.env.CLIENT_URL}/payment/success`,
-      cancel_url: `${process.env.CLIENT_URL}/payment/cancel`,
-      notify_url: `${process.env.SERVER_URL}/api/payment/notify`,
+      sandbox: process.env.PAYHERE_SANDBOX === 'true' || true,
+      merchant_id: merchantId,
+      return_url: `${clientUrl}/payment/success`,
+      cancel_url: `${clientUrl}/payment/cancel`,
+      notify_url: `${serverUrl}/api/payment/notify`,
       order_id: payment._id.toString(),
-      items: type === 'booking' ? `Booking Fee — ${doctor.clinic_name}` : `Consultation Fee — ${doctor.clinic_name}`,
+      items: type === 'booking' ? `Booking Fee — ${doctor.clinic_name || 'Clinic'}` : `Consultation Fee — ${doctor.clinic_name || 'Clinic'}`,
       amount: amount.toFixed(2),
       currency: 'LKR',
       hash,
-      first_name: patientUser.name.split(' ')[0] || 'Patient',
-      last_name: patientUser.name.split(' ').slice(1).join(' ') || '',
-      email: patientUser.email,
-      phone: patient.phone || '0000000000',
-      address: 'Sri Lanka',
+      first_name: nameParts[0] || 'Patient',
+      last_name: nameParts.slice(1).join(' ') || 'User',
+      email: patientUser.email || 'patient@example.com',
+      phone: patient?.phone || '0770000000',
+      address: 'Medical Center',
       city: 'Colombo',
       country: 'Sri Lanka',
     };
 
     res.json({ payment: { ...payment.toObject(), id: payment._id }, payhereParams });
   } catch (err) {
+    console.error('[PAYMENT ERROR] initiatePayment:', err);
     res.status(500).json({ message: err.message });
   }
 };
