@@ -285,6 +285,12 @@ export default function DoctorDashboard() {
   }, [socket]);
 
   useEffect(() => {
+    if (socket && (data.doctor?.id || data.doctor?._id)) {
+      socket.emit('join:doctor', data.doctor.id || data.doctor._id);
+    }
+  }, [socket, data.doctor]);
+
+  useEffect(() => {
     if (tab === 'feedback') fetchFeedback();
     if (tab === 'notifications') fetchNotifications();
   }, [tab]);

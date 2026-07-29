@@ -2,6 +2,7 @@ import { Server } from 'socket.io';
 
 import Doctor from '../models/Doctor.js';
 
+let io = null;
 const doctorSockets = new Map(); // doctorId -> Set of socketIds
 const socketDoctorMap = new Map(); // socketId -> doctorId
 

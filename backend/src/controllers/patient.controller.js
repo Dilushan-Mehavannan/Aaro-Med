@@ -13,7 +13,7 @@ const todayEnd = () => { const d = new Date(); d.setHours(23,59,59,999); return 
 export const getDoctors = async (req, res) => {
   try {
     const { specialization, consultation_type, search } = req.query;
-    const match = { is_approved: true, is_online: true };
+    const match = { is_approved: true };
     if (specialization) match.specialization = { $regex: specialization, $options: 'i' };
     if (consultation_type) {
       if (consultation_type === 'online') {
@@ -78,7 +78,7 @@ export const getDoctorById = async (req, res) => {
 
 export const getPsychiatrists = async (req, res) => {
   try {
-    const doctors = await Doctor.find({ is_approved: true, is_online: true }).populate({
+    const doctors = await Doctor.find({ is_approved: true }).populate({
       path: 'user_id',
       match: { is_active: true },
       select: 'name email profile_pic role'

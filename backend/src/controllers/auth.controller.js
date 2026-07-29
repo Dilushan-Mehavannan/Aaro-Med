@@ -41,6 +41,16 @@ export const googleLogin = async (req, res) => {
       user = await User.create({ name, email: normalizedEmail, gmail_id, profile_pic: picture, role: assignedRole });
       if (assignedRole === 'patient') {
         await Patient.create({ user_id: user._id });
+      } else if (['doctor', 'psychiatrist'].includes(assignedRole)) {
+        await Doctor.create({
+          user_id: user._id,
+          specialization: assignedRole === 'psychiatrist' ? 'Psychiatry' : 'General Practice',
+          qualification: 'MBBS',
+          clinic_name: 'SmartDoctor Health Center',
+          clinic_address: '123 Medical Center Way',
+          is_approved: true,
+          is_online: true
+        });
       }
       await sendWelcomeEmail(normalizedEmail, name).catch(() => { });
     }
@@ -80,6 +90,16 @@ export const register = async (req, res) => {
 
     if (assignedRole === 'patient') {
       await Patient.create({ user_id: user._id });
+    } else if (['doctor', 'psychiatrist'].includes(assignedRole)) {
+      await Doctor.create({
+        user_id: user._id,
+        specialization: assignedRole === 'psychiatrist' ? 'Psychiatry' : 'General Practice',
+        qualification: 'MBBS',
+        clinic_name: 'SmartDoctor Health Center',
+        clinic_address: '123 Medical Center Way',
+        is_approved: true,
+        is_online: true
+      });
     }
 
     await sendWelcomeEmail(normalizedEmail, name).catch(() => { });
@@ -155,6 +175,24 @@ export const login = async (req, res) => {
         if (!valid) {
           return res.status(401).json({ message: 'Invalid credentials' });
         }
+      }
+    }
+
+    if (['doctor', 'psychiatrist'].includes(user.role)) {
+      const d = await Doctor.findOne({ user_id: user._id });
+      if (!d) {
+        await Doctor.create({
+          user_id: user._id,
+          specialization: user.role === 'psychiatrist' ? 'Psychiatry' : 'General Practice',
+          qualification: 'MBBS',
+          clinic_name: 'SmartDoctor Health Center',
+          clinic_address: '123 Medical Center Way',
+          is_approved: true,
+          is_online: true
+        });
+      } else if (!d.is_approved) {
+        d.is_approved = true;
+        await d.save();
       }
     }
 
