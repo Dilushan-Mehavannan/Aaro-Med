@@ -43,7 +43,7 @@ export default function DoctorSearch() {
         </div>
 
         <form onSubmit={handleSearch} style={{ background: 'var(--glass)', border: '1px solid var(--glass-border)', borderRadius: 16, padding: 20, marginBottom: 32 }}>
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr auto', gap: 12 }}>
+          <div className="grid-auto" style={{ gap: 12 }}>
             <input className="form-input" placeholder="🔍 Search by name..." value={search} onChange={e => setSearch(e.target.value)} />
             <select className="form-input" value={specialization} onChange={e => setSpecialization(e.target.value)}>
               <option value="">All Specializations</option>
@@ -57,7 +57,7 @@ export default function DoctorSearch() {
               <option value="physical">Physical</option>
               <option value="both">Both</option>
             </select>
-            <button type="submit" className="btn btn-primary">Search</button>
+            <button type="submit" className="btn btn-primary btn-full">Search</button>
           </div>
         </form>
 

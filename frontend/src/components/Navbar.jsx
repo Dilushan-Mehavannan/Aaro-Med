@@ -77,11 +77,12 @@ export default function Navbar() {
   return (
     <nav className="navbar">
       <div className="navbar-inner">
-        <Link to="/" className="navbar-logo">
+        <Link to="/" className="navbar-logo" onClick={() => setMenuOpen(false)}>
           🏥 <span>SmartDoctor</span>
         </Link>
 
-        <div className="navbar-links">
+        {/* Desktop Navbar Links */}
+        <div className="navbar-links desktop-only">
           {links.map((l) => (
             <Link key={l.path} to={l.path} className={`navbar-link ${isActive(l.path)}`}>
               {l.label}
@@ -186,7 +187,65 @@ export default function Navbar() {
             </div>
           )}
         </div>
+
+        {/* Mobile Hamburger Toggle Button */}
+        <button 
+          className="mobile-menu-toggle"
+          onClick={() => setMenuOpen(!menuOpen)}
+          aria-label="Toggle navigation menu"
+        >
+          {menuOpen ? '✕' : '☰'}
+        </button>
       </div>
+
+      {/* Mobile Drawer Menu */}
+      {menuOpen && (
+        <div className="mobile-drawer fade-in">
+          {links.map((l) => (
+            <Link 
+              key={l.path} 
+              to={l.path} 
+              className={`mobile-link ${isActive(l.path)}`}
+              onClick={() => setMenuOpen(false)}
+            >
+              {l.label}
+            </Link>
+          ))}
+
+          {!user && (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 10, marginTop: 12 }}>
+              <Link to="/register?role=patient" className="mobile-link" onClick={() => setMenuOpen(false)}>For Patients</Link>
+              <Link to="/doctor/register" className="mobile-link" onClick={() => setMenuOpen(false)}>For Doctors</Link>
+              <Link to="/login" className="btn btn-primary btn-full" onClick={() => setMenuOpen(false)}>Sign In</Link>
+            </div>
+          )}
+
+          {user && (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 12, marginTop: 12, paddingTop: 12, borderTop: '1px solid var(--border)' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                {user.profile_pic ? (
+                  <img src={user.profile_pic} alt="" style={{ width: 36, height: 36, borderRadius: '50%', objectFit: 'cover' }} />
+                ) : (
+                  <div style={{ width: 36, height: 36, borderRadius: '50%', background: 'var(--primary)', color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1rem', fontWeight: 700 }}>
+                    {user.name?.charAt(0).toUpperCase()}
+                  </div>
+                )}
+                <div style={{ display: 'flex', flexDirection: 'column' }}>
+                  <span style={{ fontSize: '0.95rem', fontWeight: 600, color: 'var(--text-primary)' }}>{user.name}</span>
+                  <span className="badge badge-primary" style={{ width: 'fit-content', fontSize: '0.65rem' }}>{role}</span>
+                </div>
+              </div>
+
+              <button 
+                onClick={() => { setMenuOpen(false); handleLogout(); }} 
+                className="btn btn-danger btn-full"
+              >
+                Logout
+              </button>
+            </div>
+          )}
+        </div>
+      )}
     </nav>
   );
 }
