@@ -90,37 +90,39 @@ export default function LandingPage() {
     <div>
       {/* Hero */}
       <section className="hero">
-        <div className="container" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 60, alignItems: 'center', paddingTop: 80 }}>
-          <div>
-            <div style={{ display: 'inline-flex', alignItems: 'center', gap: 8, background: 'rgba(37,99,235,0.1)', border: '1px solid rgba(37,99,235,0.3)', borderRadius: 20, padding: '6px 16px', marginBottom: 24 }}>
-              <span style={{ color: 'var(--primary-light)', fontSize: '0.85rem', fontWeight: 600 }}>🚀 Smart Healthcare Platform</span>
+        <div className="container hero-container" style={{ paddingTop: 80, paddingBottom: 60 }}>
+          <div className="grid-2" style={{ gap: 40, alignItems: 'center' }}>
+            <div>
+              <div style={{ display: 'inline-flex', alignItems: 'center', gap: 8, background: 'rgba(37,99,235,0.1)', border: '1px solid rgba(37,99,235,0.3)', borderRadius: 20, padding: '6px 16px', marginBottom: 20 }}>
+                <span style={{ color: 'var(--primary-light)', fontSize: '0.85rem', fontWeight: 600 }}>🚀 Smart Healthcare Platform</span>
+              </div>
+              <h1 className="hero-title" style={{ fontWeight: 900, lineHeight: 1.1, marginBottom: 20 }}>
+                The Future of<br />
+                <span className="gradient-text">Doctor Consultations</span>
+              </h1>
+              <p style={{ fontSize: '1.05rem', color: 'var(--text-muted)', marginBottom: 28, lineHeight: 1.6 }}>
+                Book appointments instantly, track queues in real-time, conduct video consultations, and get digital prescriptions — all in one platform.
+              </p>
+              <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap' }}>
+                <Link to="/doctors" className="btn btn-primary btn-lg">🔍 Find Doctors</Link>
+                <Link to="/mental-health" className="btn btn-secondary btn-lg">🧠 Mental Health</Link>
+              </div>
             </div>
-            <h1 style={{ fontSize: '3.5rem', fontWeight: 900, lineHeight: 1.1, marginBottom: 20 }}>
-              The Future of<br />
-              <span className="gradient-text">Doctor Consultations</span>
-            </h1>
-            <p style={{ fontSize: '1.15rem', color: 'var(--text-muted)', marginBottom: 32, lineHeight: 1.7 }}>
-              Book appointments instantly, track queues in real-time, conduct video consultations, and get digital prescriptions — all in one platform.
-            </p>
-            <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap' }}>
-              <Link to="/doctors" className="btn btn-primary btn-lg">🔍 Find Doctors</Link>
-              <Link to="/mental-health" className="btn btn-secondary btn-lg">🧠 Mental Health</Link>
+            <div>
+              <LoginSection />
             </div>
-          </div>
-          <div>
-            <LoginSection />
           </div>
         </div>
       </section>
 
       {/* How It Works */}
-      <section style={{ padding: '80px 0', background: 'rgba(30,41,59,0.3)' }}>
+      <section style={{ padding: '60px 0', background: 'rgba(30,41,59,0.3)' }}>
         <div className="container">
           <div className="section-header" style={{ textAlign: 'center' }}>
             <h2 className="section-title">How It Works</h2>
             <p className="section-subtitle">Get your consultation in 4 simple steps</p>
           </div>
-          <div className="grid-4">
+          <div className="grid-auto">
             {[
               { step: '01', icon: '🔍', title: 'Search Doctor', desc: 'Find specialists by name, specialization, or consultation type' },
               { step: '02', icon: '💳', title: 'Pay Booking Fee', desc: 'Secure payment via PayHere payment gateway (LKR)' },
@@ -139,30 +141,31 @@ export default function LandingPage() {
       </section>
 
       {/* Mental Health Section */}
-      <section style={{ padding: '80px 0' }}>
+      <section style={{ padding: '60px 0' }}>
         <div className="container">
-          <div style={{
+          <div className="mental-health-banner" style={{
             background: 'linear-gradient(135deg, rgba(99,102,241,0.15), rgba(6,182,212,0.1))',
             border: '1px solid rgba(99,102,241,0.3)',
-            borderRadius: 24, padding: 48,
-            display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 40, alignItems: 'center'
+            borderRadius: 24
           }}>
-            <div>
-              <div style={{ fontSize: '3rem', marginBottom: 16 }}>🧠</div>
-              <h2 style={{ marginBottom: 12 }}>Private Mental Health Support</h2>
-              <p style={{ marginBottom: 24, lineHeight: 1.7 }}>
-                Your mental health matters. Book completely anonymous sessions with licensed psychiatrists. 
-                Your identity is fully protected — no names, no traces, just healing.
-              </p>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: 10, marginBottom: 28 }}>
-                {['🔒 100% Anonymous — identity never revealed', '📹 Online-only for complete privacy', '🛡️ End-to-end encrypted sessions'].map(f => (
-                  <div key={f} style={{ fontSize: '0.9rem', color: 'var(--text-secondary)' }}>{f}</div>
-                ))}
+            <div className="grid-2" style={{ gap: 32, alignItems: 'center' }}>
+              <div>
+                <div style={{ fontSize: '3rem', marginBottom: 16 }}>🧠</div>
+                <h2 style={{ marginBottom: 12 }}>Private Mental Health Support</h2>
+                <p style={{ marginBottom: 24, lineHeight: 1.7 }}>
+                  Your mental health matters. Book completely anonymous sessions with licensed psychiatrists. 
+                  Your identity is fully protected — no names, no traces, just healing.
+                </p>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 10, marginBottom: 28 }}>
+                  {['🔒 100% Anonymous — identity never revealed', '📹 Online-only for complete privacy', '🛡️ End-to-end encrypted sessions'].map(f => (
+                    <div key={f} style={{ fontSize: '0.9rem', color: 'var(--text-secondary)' }}>{f}</div>
+                  ))}
+                </div>
+                <Link to="/mental-health" className="btn btn-primary btn-lg">Book Anonymously</Link>
               </div>
-              <Link to="/mental-health" className="btn btn-primary btn-lg">Book Anonymously</Link>
-            </div>
-            <div style={{ textAlign: 'center' }}>
-              <div style={{ fontSize: '8rem', lineHeight: 1 }}>🫂</div>
+              <div style={{ textAlign: 'center' }}>
+                <div style={{ fontSize: '6rem', lineHeight: 1 }}>🫂</div>
+              </div>
             </div>
           </div>
         </div>
